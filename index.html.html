@@ -462,8 +462,8 @@ footer {
 
   <section class="philosophy">
     <div class="phil-label">Our Philosophy</div>
-    <blockquote class="phil-quote">"Elegance is not about being noticed, it is about being remembered."</blockquote>
-    <div class="phil-attr">— Giorgio Armani</div>
+    <blockquote class="phil-quote" id="phil-quote">"Elegance is not about being noticed, it is about being remembered."</blockquote>
+    <div class="phil-attr" id="phil-attr">— Giorgio Armani</div>
   </section>
 
   <section class="newsletter" id="newsletter">
@@ -866,8 +866,19 @@ async function subscribe() {
   }
 }
 
+// ── QUOTE ──
+async function loadQuote() {
+  try {
+    const rows = await sbGet('orangerie_settings?select=key,value');
+    const map  = Object.fromEntries(rows.map(r => [r.key, r.value]));
+    if (map['quote_text'])   document.getElementById('phil-quote').textContent = `"${map['quote_text']}"`;
+    if (map['quote_author']) document.getElementById('phil-attr').textContent  = `— ${map['quote_author']}`;
+  } catch(e) { /* keep default */ }
+}
+
 // ── INIT ──
 loadHome();
+loadQuote();
 </script>
 </body>
 </html>
