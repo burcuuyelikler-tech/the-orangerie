@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Orangerie</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      #F0EDE5;
+  --ink:     #1C1814;
+  --ink-mid: #4A433B;
+  --ink-lt:  #8A8078;
+  --gold:    #A8823C;
+  --border:  rgba(28,24,20,.12);
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+a { text-decoration: none; color: inherit; }
+.view { display: none; }
+.view.active { display: block; }
+
+/* ─── NAV ─── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 0 56px; height: 60px;
+}
+.nav-logo {
+  font-size: 18px; font-weight: 400; letter-spacing: .02em;
+  color: var(--ink); cursor: pointer; flex-shrink: 0;
+}
+.nav-links {
+  display: flex; gap: 40px; list-style: none;
+  position: absolute; left: 50%; transform: translateX(-50%);
+}
+.nav-links li span {
+  font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--ink-mid); cursor: pointer; transition: color .25s;
+}
+.nav-links li span:hover { color: var(--ink); }
+.nav-subscribe {
+  font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--ink-mid); cursor: pointer; transition: color .25s;
+}
+.nav-subscribe:hover { color: var(--ink); }
+
+/* ─── HOME ─── */
+.hero {
+  display: grid; grid-template-columns: 1fr 1fr;
+  min-height: 520px; padding: 0 56px;
+  align-items: center; gap: 0;
+}
+.hero-text { padding-right: 48px; }
+.hero-kicker {
+  font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--ink-lt); margin-bottom: 22px;
+}
+.hero-hed {
+  font-size: clamp(42px, 4.5vw, 64px);
+  font-weight: 400; line-height: 1.05;
+  color: var(--ink); margin-bottom: 24px;
+}
+.hero-hed em { font-style: italic; font-weight: 300; }
+.hero-dek {
+  font-size: 14px; line-height: 1.75; color: var(--ink-mid);
+  max-width: 360px; margin-bottom: 32px;
+  font-weight: 300;
+}
+.hero-cta {
+  font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--ink); border-bottom: 1px solid var(--ink);
+  padding-bottom: 3px; display: inline-block;
+  cursor: pointer; transition: all .25s;
+}
+.hero-cta:hover { color: var(--gold); border-color: var(--gold); }
+.hero-img {
+  width: 100%; aspect-ratio: 4/3; overflow: hidden;
+  background: #D8D0C4;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 96px;
+}
+.hero-img img { width: 100%; height: 100%; object-fit: cover; }
+
+/* JOURNAL SECTION */
+.journal-section { padding: 64px 56px 80px; }
+.journal-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 8px;
+}
+.journal-title { font-size: 28px; font-weight: 400; color: var(--ink); }
+.journal-view-all {
+  font-size: 11px; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--ink-lt); cursor: pointer; transition: color .25s;
+}
+.journal-view-all:hover { color: var(--ink); }
+.journal-rule { height: 1px; background: var(--border); margin-bottom: 40px; }
+
+.journal-grid {
+  display: grid; grid-template-columns: repeat(4,1fr); gap: 32px;
+}
+/* loading / empty states */
+.grid-loading {
+  grid-column: 1/-1; text-align: center;
+  padding: 60px; font-size: 13px; letter-spacing: .15em;
+  text-transform: uppercase; color: var(--ink-lt);
+}
+.grid-empty {
+  grid-column: 1/-1; text-align: center;
+  padding: 60px; font-size: 16px; font-style: italic; color: var(--ink-lt);
+}
+
+.j-card { cursor: pointer; }
+.j-card:hover .j-card-title { color: var(--gold); }
+.j-card-img {
+  width: 100%; aspect-ratio: 3/4; overflow: hidden;
+  background: #D5CEC4; margin-bottom: 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 56px;
+}
+.j-card-img img { width:100%; height:100%; object-fit:cover; transition: transform .5s ease; }
+.j-card:hover .j-card-img img { transform: scale(1.04); }
+.j-card-sec {
+  font-size: 10px; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--ink-lt); margin-bottom: 10px;
+}
+.j-card-title {
+  font-size: 19px; font-weight: 400; line-height: 1.3;
+  color: var(--ink); margin-bottom: 10px; transition: color .25s;
+}
+.j-card-blurb {
+  font-size: 13px; line-height: 1.7; color: var(--ink-mid);
+  font-weight: 300; margin-bottom: 12px;
+}
+.j-card-date {
+  font-size: 10px; letter-spacing: .15em; text-transform: uppercase;
+  color: var(--ink-lt);
+}
+
+/* PHILOSOPHY */
+.philosophy {
+  background: #E8E4DC; padding: 96px 56px; text-align: center;
+}
+.phil-label {
+  font-size: 11px; letter-spacing: .25em; text-transform: uppercase;
+  color: var(--ink-lt); margin-bottom: 32px;
+}
+.phil-quote {
+  font-size: clamp(28px, 3.5vw, 48px);
+  font-weight: 300; font-style: italic;
+  line-height: 1.35; color: var(--ink);
+  max-width: 780px; margin: 0 auto 24px;
+}
+.phil-attr { font-size: 12px; letter-spacing: .15em; color: var(--ink-lt); }
+
+/* NEWSLETTER */
+.newsletter {
+  padding: 96px 56px; text-align: center;
+  border-top: 1px solid var(--border);
+}
+.nl-label {
+  font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--ink-lt); margin-bottom: 20px;
+}
+.nl-title { font-size: clamp(32px,3.5vw,48px); font-weight: 400; color: var(--ink); margin-bottom: 18px; }
+.nl-sub {
+  font-size: 14px; line-height: 1.7; color: var(--ink-mid);
+  max-width: 560px; margin: 0 auto 40px;
+  font-weight: 300; font-style: italic;
+}
+.nl-form {
+  display: flex; max-width: 560px; margin: 0 auto;
+}
+.nl-input {
+  flex: 1; padding: 14px 20px;
+  background: transparent; border: none;
+  border-bottom: 1px solid var(--ink); outline: none;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 15px; color: var(--ink);
+}
+.nl-input::placeholder { color: var(--ink-lt); font-style: italic; }
+.nl-btn {
+  padding: 14px 32px; background: var(--ink); border: none;
+  cursor: pointer; font-family: 'Cormorant Garamond', serif;
+  font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--bg); transition: background .25s;
+}
+.nl-btn:hover { background: #333; }
+
+/* FOOTER */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 40px 56px 28px;
+}
+.ft-top {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 28px;
+}
+.ft-logo { font-size: 17px; font-weight: 400; color: var(--ink); }
+.ft-links { display: flex; gap: 36px; list-style: none; }
+.ft-links li span {
+  font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--ink-lt); cursor: pointer; transition: color .25s;
+}
+.ft-links li span:hover { color: var(--ink); }
+.ft-copy {
+  border-top: 1px solid var(--border); padding-top: 20px;
+  text-align: center; font-size: 12px; color: var(--ink-lt);
+  font-style: italic;
+}
+
+/* mini footer bar */
+.mini-ft {
+  border-top: 1px solid var(--border); padding: 16px 56px;
+  display: flex; justify-content: space-between;
+}
+.mini-ft span { font-size: 11px; letter-spacing: .1em; color: var(--ink-lt); font-style: italic; }
+.mini-ft .back { cursor: pointer; transition: color .25s; }
+.mini-ft .back:hover { color: var(--ink); }
+
+/* ─── ARTICLE ─── */
+#article-view { background: var(--bg); }
+.art-nav-strip {
+  padding: 16px 56px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+}
+.art-nav-strip span {
+  font-size: 11px; letter-spacing: .15em; text-transform: uppercase; color: var(--ink-lt);
+}
+.art-nav-strip .crumb-link { cursor: pointer; transition: color .2s; }
+.art-nav-strip .crumb-link:hover { color: var(--ink); }
+.art-nav-strip .crumb-sep { color: var(--border); }
+.art-nav-strip .crumb-current { color: var(--ink); }
+
+.art-header {
+  padding: 72px 56px 56px; max-width: 860px;
+  border-bottom: 1px solid var(--border);
+}
+.art-header-sec {
+  font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--ink-lt); margin-bottom: 20px;
+}
+.art-header-hed {
+  font-size: clamp(36px,4.5vw,64px);
+  font-weight: 400; line-height: 1.05;
+  color: var(--ink); margin-bottom: 22px; letter-spacing: -.01em;
+}
+.art-header-hed em { font-style: italic; font-weight: 300; }
+.art-header-dek {
+  font-size: 17px; font-style: italic; line-height: 1.7;
+  color: var(--ink-mid); max-width: 620px;
+  font-weight: 300; margin-bottom: 28px;
+}
+.art-header-meta {
+  font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-lt);
+}
+
+/* Article layout */
+.art-layout {
+  display: grid; grid-template-columns: 1fr 300px;
+  max-width: 1200px; padding: 0 56px; margin: 0 auto;
+}
+.art-main { padding: 56px 64px 64px 0; border-right: 1px solid var(--border); }
+.art-lede {
+  font-size: 18px; font-style: italic; line-height: 1.8;
+  color: var(--ink-mid); margin-bottom: 40px; font-weight: 300;
+  padding-bottom: 32px; border-bottom: 1px solid var(--border);
+}
+.art-body { columns: 2; column-gap: 44px; }
+.art-body p {
+  font-size: 15.5px; font-weight: 300; line-height: 1.9;
+  color: var(--ink); margin-bottom: 22px; letter-spacing: .005em;
+  break-inside: avoid;
+}
+.art-body p.drop::first-letter {
+  font-size: 72px; font-weight: 300; float: left;
+  line-height: .75; margin-right: 8px; color: var(--ink); padding-top: 6px;
+}
+.art-body h3 {
+  font-size: 11px; letter-spacing: .25em; text-transform: uppercase;
+  color: var(--ink); margin: 32px 0 14px;
+  column-span: all; clear: both;
+  border-top: 1px solid var(--ink); padding-top: 16px;
+}
+.art-float-img {
+  float: right; width: 46%; margin: 0 0 20px 28px; clear: right;
+}
+.art-float-img-box {
+  width: 100%; aspect-ratio: 4/3; overflow: hidden;
+  background: #D8D0C4; margin-bottom: 8px;
+  display: flex; align-items: center; justify-content: center; font-size: 52px;
+}
+.art-float-img-box img { width:100%; height:100%; object-fit:cover; }
+.art-float-caption {
+  font-size: 11px; font-style: italic; color: var(--ink-lt);
+  line-height: 1.5;
+}
+.art-pullq {
+  column-span: all; clear: both;
+  margin: 8px 0 28px; padding: 28px 0;
+  border-top: 2px solid var(--ink);
+  border-bottom: 1px solid var(--border);
+}
+.art-pullq-text {
+  font-size: 22px; font-weight: 300; font-style: italic;
+  line-height: 1.5; color: var(--ink); letter-spacing: .01em;
+  max-width: 580px;
+}
+.art-tags {
+  column-span: all; clear: both;
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border);
+}
+.art-tag {
+  font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--ink-lt); border: 1px solid var(--border);
+  padding: 6px 14px; cursor: pointer; transition: all .25s;
+}
+.art-tag:hover { color: var(--ink); border-color: var(--ink); }
+
+/* sidebar */
+.art-sidebar { padding: 56px 0 64px 48px; }
+.art-sb-section { margin-bottom: 40px; }
+.art-sb-title {
+  font-size: 10px; letter-spacing: .25em; text-transform: uppercase;
+  color: var(--ink-lt); margin-bottom: 16px;
+  padding-bottom: 10px; border-bottom: 1px solid var(--border);
+}
+.art-sb-img-box {
+  width: 100%; aspect-ratio: 3/4; overflow: hidden;
+  background: #D8D0C4; margin-bottom: 10px;
+  display: flex; align-items: center; justify-content: center; font-size: 52px;
+}
+.art-sb-img-box img { width:100%; height:100%; object-fit:cover; }
+.art-sb-caption { font-size: 11px; font-style: italic; color: var(--ink-lt); line-height: 1.5; }
+.art-sb-fact { padding: 12px 0; border-bottom: 1px solid var(--border); }
+.art-sb-fact:last-child { border-bottom: none; }
+.art-sb-fact-label {
+  font-size: 10px; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--ink-lt); margin-bottom: 4px;
+}
+.art-sb-fact-val { font-size: 14px; font-weight: 300; color: var(--ink); line-height: 1.5; font-style: italic; }
+.art-sb-stat { text-align: center; padding: 24px 0; border-top: 2px solid var(--ink); }
+.art-sb-stat-n {
+  font-size: 48px; font-weight: 300; font-style: italic;
+  color: var(--ink); line-height: 1;
+}
+.art-sb-stat-l {
+  font-size: 11px; letter-spacing: .15em; text-transform: uppercase;
+  color: var(--ink-lt); margin-top: 6px;
+}
+.art-sb-also-item {
+  padding: 12px 0; border-bottom: 1px solid var(--border); cursor: pointer;
+}
+.art-sb-also-item:last-child { border-bottom: none; }
+.art-sb-also-sec {
+  font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--ink-lt); margin-bottom: 4px;
+}
+.art-sb-also-title {
+  font-size: 14px; font-weight: 400; color: var(--ink);
+  line-height: 1.3; transition: color .25s;
+}
+.art-sb-also-item:hover .art-sb-also-title { color: var(--gold); }
+
+/* related */
+.art-related { padding: 64px 56px; background: #E8E4DC; }
+.art-related-hed { font-size: 22px; font-weight: 400; color: var(--ink); margin-bottom: 6px; }
+.rel-rule { height:1px; background: var(--border); margin-bottom: 36px; }
+.rel-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 32px; }
+
+/* ─── CATEGORY ─── */
+.cat-header { padding: 72px 56px 48px; border-bottom: 1px solid var(--border); }
+.cat-label {
+  font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--ink-lt); margin-bottom: 16px;
+}
+.cat-hed {
+  font-size: clamp(48px,6vw,80px); font-weight: 400;
+  line-height: .95; color: var(--ink); margin-bottom: 16px;
+}
+.cat-hed em { font-style: italic; font-weight: 300; }
+.cat-desc { font-size: 16px; font-style: italic; color: var(--ink-mid); font-weight: 300; max-width: 520px; line-height: 1.7; }
+.cat-grid-wrap { padding: 56px 56px 80px; display: grid; grid-template-columns: repeat(3,1fr); gap: 40px 32px; }
+
+/* responsive */
+@media (max-width: 960px) {
+  nav { padding: 0 24px; }
+  .nav-links { display: none; }
+  .hero { grid-template-columns: 1fr; padding: 40px 24px; gap: 32px; }
+  .journal-section { padding: 48px 24px 60px; }
+  .journal-grid { grid-template-columns: 1fr 1fr; gap: 24px; }
+  .philosophy { padding: 64px 24px; }
+  .newsletter { padding: 64px 24px; }
+  footer { padding: 32px 24px 20px; }
+  .ft-top { flex-direction: column; gap: 20px; align-items: flex-start; }
+  .mini-ft { padding: 16px 24px; }
+  .art-nav-strip { padding: 14px 24px; }
+  .art-header { padding: 48px 24px 40px; }
+  .art-layout { grid-template-columns: 1fr; padding: 0 24px; }
+  .art-main { padding: 40px 0; border-right: none; }
+  .art-body { columns: 1; }
+  .art-sidebar { padding: 0 0 40px; border-top: 1px solid var(--border); }
+  .art-related { padding: 48px 24px; }
+  .rel-grid { grid-template-columns: 1fr; }
+  .cat-header { padding: 48px 24px 36px; }
+  .cat-grid-wrap { padding: 40px 24px 60px; grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo" onclick="goto('home')">The Orangerie</div>
+  <ul class="nav-links">
+    <li><span onclick="goto('home')">Journal</span></li>
+    <li><span onclick="showCat('Style')">Style</span></li>
+    <li><span onclick="showCat('Interiors')">Interiors</span></li>
+    <li><span onclick="showCat('Travel & Places')">Travel</span></li>
+    <li><span onclick="showCat('Art de Vivre')">Art de Vivre</span></li>
+  </ul>
+  <span class="nav-subscribe" onclick="scrollToNL()">Subscribe</span>
+</nav>
+
+<!-- ════ HOME ════ -->
+<div id="home" class="view active">
+
+  <section class="hero">
+    <div class="hero-text">
+      <div class="hero-kicker">The Art of Quiet Refinement</div>
+      <h1 class="hero-hed">Wealth Whispers, <em>Never Shouts</em></h1>
+      <p class="hero-dek">A curated exploration of timeless elegance, understated luxury, and the quiet confidence that defines true refinement. Where less is always more.</p>
+      <span class="hero-cta" id="hero-cta" onclick="openFirstArticle()">Begin Reading</span>
+    </div>
+    <div class="hero-img" id="hero-img">
+      <span style="font-size:80px;opacity:.3">🧶</span>
+    </div>
+  </section>
+
+  <section class="journal-section">
+    <div class="journal-header">
+      <h2 class="journal-title">Latest from the Journal</h2>
+      <span class="journal-view-all" onclick="showCat('all')">View All</span>
+    </div>
+    <div class="journal-rule"></div>
+    <div class="journal-grid" id="home-grid">
+      <div class="grid-loading">Loading...</div>
+    </div>
+  </section>
+
+  <section class="philosophy">
+    <div class="phil-label">Our Philosophy</div>
+    <blockquote class="phil-quote">"Elegance is not about being noticed, it is about being remembered."</blockquote>
+    <div class="phil-attr">— Giorgio Armani</div>
+  </section>
+
+  <section class="newsletter" id="newsletter">
+    <div class="nl-label">Newsletter</div>
+    <h2 class="nl-title">Join the Inner Circle</h2>
+    <p class="nl-sub">Receive our weekly musings on quiet luxury, timeless style, and the art of living well — delivered with discretion to your inbox.</p>
+    <div class="nl-form">
+      <input class="nl-input" type="email" placeholder="Your email address">
+      <button class="nl-btn">Subscribe</button>
+    </div>
+  </section>
+
+  <footer>
+    <div class="ft-top">
+      <div class="ft-logo">The Orangerie</div>
+      <ul class="ft-links">
+        <li><span onclick="goto('home')">Journal</span></li>
+        <li><span onclick="showCat('Style')">Style</span></li>
+        <li><span onclick="showCat('Interiors')">Interiors</span></li>
+        <li><span onclick="showCat('Travel & Places')">Travel</span></li>
+        <li><span onclick="showCat('Art de Vivre')">Art de Vivre</span></li>
+        <li><span>About</span></li>
+      </ul>
+    </div>
+    <div class="ft-copy">© 2026 The Orangerie. All rights reserved.</div>
+  </footer>
+
+</div>
+
+<!-- ════ ARTICLE ════ -->
+<div id="article-view" class="view">
+
+  <div class="art-nav-strip">
+    <span class="crumb-link" onclick="goto('home')">Journal</span>
+    <span class="crumb-sep">—</span>
+    <span class="crumb-current" id="art-crumb">Article</span>
+  </div>
+
+  <div class="art-header">
+    <div class="art-header-sec" id="art-sec"></div>
+    <h1 class="art-header-hed" id="art-hed"></h1>
+    <p class="art-header-dek" id="art-dek"></p>
+    <div class="art-header-meta" id="art-meta"></div>
+  </div>
+
+  <div class="art-layout">
+    <div class="art-main">
+      <p class="art-lede" id="art-lede"></p>
+      <div class="art-body" id="art-body-content"></div>
+    </div>
+    <div class="art-sidebar">
+      <div class="art-sb-section" id="sb-img-section">
+        <div class="art-sb-title">Photograph</div>
+        <div class="art-sb-img-box" id="art-sb-img">
+          <span id="art-sb-emoji" style="font-size:52px"></span>
+        </div>
+        <div class="art-sb-caption" id="art-sb-cap"></div>
+      </div>
+      <div class="art-sb-section" id="sb-facts-section">
+        <div class="art-sb-title">Context</div>
+        <div id="art-facts"></div>
+      </div>
+      <div class="art-sb-section" id="sb-stat-section">
+        <div class="art-sb-stat">
+          <div class="art-sb-stat-n" id="art-stat-n"></div>
+          <div class="art-sb-stat-l" id="art-stat-l"></div>
+        </div>
+      </div>
+      <div class="art-sb-section" id="sb-also-section">
+        <div class="art-sb-title">Also in this section</div>
+        <div id="art-also"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="art-related">
+    <div class="art-related-hed">Continue Reading</div>
+    <div class="rel-rule"></div>
+    <div class="rel-grid" id="rel-grid">
+      <div class="grid-loading">Loading...</div>
+    </div>
+  </div>
+
+  <div class="mini-ft">
+    <span>© 2026 The Orangerie. All rights reserved.</span>
+    <span class="back" onclick="goto('home')">← Return to Journal</span>
+  </div>
+
+</div>
+
+<!-- ════ CATEGORY ════ -->
+<div id="cat-view" class="view">
+  <div class="cat-header">
+    <div class="cat-label">The Orangerie Journal</div>
+    <h1 class="cat-hed" id="cat-hed">All Articles</h1>
+    <p class="cat-desc" id="cat-desc"></p>
+  </div>
+  <div class="cat-grid-wrap" id="cat-grid">
+    <div class="grid-loading">Loading...</div>
+  </div>
+  <div class="mini-ft">
+    <span>© 2026 The Orangerie. All rights reserved.</span>
+    <span class="back" onclick="goto('home')">← Return to Journal</span>
+  </div>
+</div>
+
+<script>
+// ── SUPABASE ──
+const SB_URL = 'https://ucwgkduvpnklfggleupb.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjd2drZHV2cG5rbGZnZ2xldXBiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDE1NzcsImV4cCI6MjA4NzE3NzU3N30.AKBjKoYp2xie6qd19crJVMIJDFzmXPTqU2BTtFHnypw';
+const HDR    = { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` };
+
+async function sbGet(path) {
+  const res = await fetch(`${SB_URL}/rest/v1/${path}`, { headers: HDR });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+// ── STATE ──
+let allArticles = [];
+let currentArticleId = null;
+
+// ── ROUTING ──
+function goto(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function scrollToNL() {
+  goto('home');
+  setTimeout(() => document.getElementById('newsletter').scrollIntoView({ behavior: 'smooth' }), 100);
+}
+
+// ── CARD BUILDER ──
+function buildCard(a) {
+  const div = document.createElement('div');
+  div.className = 'j-card';
+  div.onclick = () => openArticle(a);
+
+  const imgHtml = a.cover_image_url
+    ? `<img src="${a.cover_image_url}" alt="${a.title}" loading="lazy">`
+    : `<span style="font-size:56px">${a.cover_emoji || '📰'}</span>`;
+
+  div.innerHTML = `
+    <div class="j-card-img">${imgHtml}</div>
+    <div class="j-card-sec">${a.section}</div>
+    <div class="j-card-title">${buildTitle(a)}</div>
+    <div class="j-card-blurb">${a.subtitle || ''}</div>
+    <div class="j-card-date">${fmtDate(a.created_at)}</div>`;
+  return div;
+}
+
+function buildTitle(a) {
+  if (!a.subtitle) return a.title;
+  // if title ends with the subtitle text, wrap last part in em
+  const idx = a.title.lastIndexOf(a.subtitle);
+  if (idx > 0) return a.title.substring(0, idx) + `<em>${a.subtitle}</em>`;
+  return a.title;
+}
+
+// ── HOME ──
+async function loadHome() {
+  try {
+    allArticles = await sbGet('orangerie_articles?select=*&published=eq.true&order=created_at.desc');
+    const grid = document.getElementById('home-grid');
+    grid.innerHTML = '';
+
+    if (!allArticles.length) {
+      grid.innerHTML = '<div class="grid-empty">No articles published yet.</div>';
+      return;
+    }
+
+    // hero: first article
+    const first = allArticles[0];
+    const heroImg = document.getElementById('hero-img');
+    if (first.cover_image_url) {
+      heroImg.innerHTML = `<img src="${first.cover_image_url}" alt="${first.title}">`;
+    } else {
+      heroImg.innerHTML = `<span style="font-size:80px;opacity:.3">${first.cover_emoji || '📰'}</span>`;
+    }
+    document.getElementById('hero-cta').onclick = () => openArticle(first);
+
+    // grid: up to 8
+    allArticles.slice(0, 8).forEach(a => grid.appendChild(buildCard(a)));
+  } catch(e) {
+    document.getElementById('home-grid').innerHTML =
+      `<div class="grid-empty" style="color:#c0392b">${e.message}</div>`;
+  }
+}
+
+function openFirstArticle() {
+  if (allArticles.length) openArticle(allArticles[0]);
+}
+
+// ── ARTICLE ──
+async function openArticle(a) {
+  currentArticleId = a.id;
+  // full data if needed
+  if (!a.body) {
+    try { [a] = await sbGet(`orangerie_articles?id=eq.${a.id}&select=*`); } catch(e) {}
+  }
+
+  // breadcrumb & header
+  document.getElementById('art-crumb').textContent = a.section;
+  document.getElementById('art-sec').textContent   = a.section;
+  document.getElementById('art-hed').innerHTML     = buildTitle(a);
+  document.getElementById('art-dek').textContent   = a.subtitle || '';
+  document.getElementById('art-meta').textContent  = `The Orangerie · ${fmtDate(a.created_at)}`;
+  document.getElementById('art-lede').textContent  = a.lede || '';
+
+  // body — parse markdown-lite
+  document.getElementById('art-body-content').innerHTML = parseBody(a.body || '', a);
+
+  // sidebar image
+  const sbImg = document.getElementById('art-sb-img');
+  const sbEmo = document.getElementById('art-sb-emoji');
+  if (a.sidebar_image_url) {
+    sbImg.innerHTML = `<img src="${a.sidebar_image_url}" alt="">`;
+  } else {
+    sbImg.innerHTML = '';
+    sbEmo.textContent = a.cover_emoji || '📰';
+    sbImg.appendChild(sbEmo);
+  }
+  document.getElementById('art-sb-cap').textContent = a.section + ' · The Orangerie Archive';
+
+  // facts
+  const factsEl = document.getElementById('art-facts');
+  const facts    = a.facts || [];
+  factsEl.innerHTML = facts.length
+    ? facts.map(f => `
+        <div class="art-sb-fact">
+          <div class="art-sb-fact-label">${f.label}</div>
+          <div class="art-sb-fact-val">${f.value}</div>
+        </div>`).join('')
+    : '';
+  document.getElementById('sb-facts-section').style.display = facts.length ? '' : 'none';
+
+  // stat
+  document.getElementById('art-stat-n').textContent = a.stat_number || '';
+  document.getElementById('art-stat-l').textContent = a.stat_label  || '';
+  document.getElementById('sb-stat-section').style.display = a.stat_number ? '' : 'none';
+
+  // also in section
+  const also = allArticles.filter(x => x.section === a.section && x.id !== a.id).slice(0,3);
+  document.getElementById('art-also').innerHTML = also.map(x => `
+    <div class="art-sb-also-item" onclick="openArticle(${JSON.stringify(x).replace(/"/g,'&quot;')})">
+      <div class="art-sb-also-sec">${x.section}</div>
+      <div class="art-sb-also-title">${x.title}</div>
+    </div>`).join('') || '<div style="font-size:13px;font-style:italic;color:var(--ink-lt)">No other articles in this section yet.</div>';
+  document.getElementById('sb-also-section').style.display = '';
+
+  // related
+  const related = allArticles.filter(x => x.id !== a.id).slice(0,3);
+  const relGrid = document.getElementById('rel-grid');
+  relGrid.innerHTML = '';
+  related.forEach(x => relGrid.appendChild(buildCard(x)));
+
+  // pull quote
+  if (a.pull_quote) {
+    const pq = document.createElement('div');
+    pq.className = 'art-pullq';
+    pq.innerHTML = `<div class="art-pullq-text">${a.pull_quote}</div>`;
+    const body = document.getElementById('art-body-content');
+    if (body.firstChild) body.insertBefore(pq, body.firstChild);
+    else body.appendChild(pq);
+  }
+
+  // tags
+  if ((a.tags || []).length) {
+    const tags = document.createElement('div');
+    tags.className = 'art-tags';
+    tags.innerHTML = a.tags.map(t => `<span class="art-tag">${t}</span>`).join('');
+    document.getElementById('art-body-content').appendChild(tags);
+  }
+
+  goto('article-view');
+}
+
+// Body parser: ## heading, >> pullquote, plain paragraphs, first p gets drop cap
+function parseBody(text, a) {
+  if (!text) return '';
+  const lines = text.split('\n');
+  let html = '';
+  let paraBuffer = [];
+  let firstPara  = true;
+
+  function flushParas() {
+    paraBuffer.forEach(p => {
+      if (p.trim()) {
+        const cls = firstPara ? ' class="drop"' : '';
+        html += `<p${cls}>${p.trim()}</p>`;
+        firstPara = false;
+      }
+    });
+    paraBuffer = [];
+  }
+
+  lines.forEach(line => {
+    if (line.startsWith('## ')) {
+      flushParas();
+      html += `<h3>${line.slice(3)}</h3>`;
+    } else if (line.startsWith('>> ')) {
+      // inline pull quote (skip — we use the pull_quote field for sidebar)
+    } else if (line.trim() === '') {
+      flushParas();
+    } else {
+      // float image after 2nd paragraph
+      if (!firstPara && paraBuffer.length === 0 && a.cover_image_url && !html.includes('art-float-img')) {
+        html += `<div class="art-float-img">
+          <div class="art-float-img-box"><img src="${a.cover_image_url}" alt=""></div>
+          <div class="art-float-caption">${a.section} · The Orangerie Archive</div>
+        </div>`;
+      }
+      paraBuffer.push(line);
+    }
+  });
+  flushParas();
+  return html;
+}
+
+// ── CATEGORY ──
+async function showCat(name) {
+  goto('cat-view');
+  const grid = document.getElementById('cat-grid');
+  grid.innerHTML = '<div class="grid-loading">Loading...</div>';
+
+  try {
+    if (!allArticles.length) {
+      allArticles = await sbGet('orangerie_articles?select=*&published=eq.true&order=created_at.desc');
+    }
+    const filtered = name === 'all'
+      ? allArticles
+      : allArticles.filter(a => a.section === name);
+
+    if (name === 'all') {
+      document.getElementById('cat-hed').innerHTML = 'The <em>Journal</em>';
+      document.getElementById('cat-desc').textContent = 'All stories from The Orangerie.';
+    } else {
+      document.getElementById('cat-hed').innerHTML = name.includes('&')
+        ? name.replace('&', '<br><em>&') + '</em>'
+        : `<em>${name}</em>`;
+      document.getElementById('cat-desc').textContent = '';
+    }
+
+    grid.innerHTML = '';
+    if (!filtered.length) {
+      grid.innerHTML = '<div class="grid-empty">No articles in this section yet.</div>';
+      return;
+    }
+    filtered.forEach(a => grid.appendChild(buildCard(a)));
+  } catch(e) {
+    grid.innerHTML = `<div class="grid-empty" style="color:#c0392b">${e.message}</div>`;
+  }
+}
+
+// ── UTILS ──
+function fmtDate(d) {
+  return new Date(d).toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' });
+}
+
+// ── INIT ──
+loadHome();
+</script>
+</body>
+</html>
